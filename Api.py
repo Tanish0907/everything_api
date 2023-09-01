@@ -111,6 +111,11 @@ def get_info(id: Optional[str] = None):
             return {"Error": "NOT A VALID ID"}
 
 
+@app.get("/anime")
+def anime():
+    return {"anime": "working"}
+
+
 @app.get("/anime/anime_name")
 def get_anime(animename: Optional[str] = None):
     link = f'https://gogoanimehd.to/search.html?keyword={animename}'
