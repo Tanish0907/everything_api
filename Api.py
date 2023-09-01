@@ -10,8 +10,6 @@ app = FastAPI()
 
 anime_list = {}
 
-yt_search = {}
-
 
 @app.get("/")
 def home():
@@ -48,8 +46,21 @@ def get_info(*, id: Optional[str] = None, name: Optional[str] = None):
             except:
                 return {"Error": "NOT A VALID ID"}
     elif id == None:
+
+        yt_search = {}
+
         s = Search(name)
-        return s.results
+        res = 0
+        for i in s.results:
+            vid = {}
+            vid["video_id"] = i.video_id
+            vid["embed_link"] = i.embed_url
+            vid["creator"] = i._author
+            vid["title"] = i.title
+            vid["thumbnail"] = YouTube(i.watch_url).thumbnail_url
+            yt_search[res] = vid
+            res += 1
+        return yt_search
 
 
 @app.get("/anime")
@@ -74,10 +85,15 @@ def get_anime(name: Optional[str] = None):
 
 @app.get("/anime/{anime_name}")
 def get_anime_info(anime_name: str):
+    anime_name = anime_name.replace(" ", "-")
     anime = {}
     link = f"https://gogoanimehd.to/category/{anime_name}"
     r = requests.get(link).text
     soup = bs(r, 'lxml')
+    if soup == None:
+        return {"Error": "Anime title not found"}
+    poster = soup.find("div", class_="anime_info_body_bg")
+    poster = poster.find("img")["src"]
     total_ep = soup.find('ul', {'id': 'episode_page'})
     total_ep = total_ep.find("a")['ep_end']
     total_ep = int(total_ep)
@@ -87,6 +103,7 @@ def get_anime_info(anime_name: str):
         genre.append(i["title"])
     anime["name"] = anime_name
     anime["genre"] = genre
+    anime["poster"] = poster
     anime["episodes"] = total_ep
     anime["watch_online"] = []
     anime["download_links"] = []
