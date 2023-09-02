@@ -6,9 +6,23 @@ from bs4 import BeautifulSoup as bs
 import requests
 import pytube.contrib.playlist as pl
 
+
+def get_chapters(ch_list):
+    ch_dict = {}
+    for i in ch_list:
+        ch = i.split("-")[-1]
+        ln = requests.get(i).text
+        soup = bs(ln, 'lxml')
+        page = soup.find('p')
+        mang_page_link = list(page.text.split(","))
+        ch_dict[ch] = mang_page_link
+    return (ch_dict)
+
+
 app = FastAPI()
 
 anime_list = {}
+manga_res = {}
 
 
 @app.get("/")
@@ -95,7 +109,8 @@ def get_anime_info(anime_name: str):
     poster = soup.find("div", class_="anime_info_body_bg")
     poster = poster.find("img")["src"]
     total_ep = soup.find('ul', {'id': 'episode_page'})
-    total_ep = total_ep.find("a")['ep_end']
+    total_ep = total_ep.find_all("a")
+    total_ep = total_ep[len(total_ep)-1]["ep_end"]
     total_ep = int(total_ep)
     anime_details = soup.find_all("p", class_="type")
     genre = []
@@ -118,3 +133,50 @@ def get_anime_info(anime_name: str):
         download_link = download_link.find("a").get('href')
         anime["download_links"].append(download_link)
     return anime
+
+
+@app.get("/manga")
+def manga():
+    return {"manga": "working"}
+
+
+@app.get("/manga/search")
+def search(keyword: str = None):
+    if keyword == None:
+        return {"Error": "enter a keyword"}
+    link = f'https://mangapanda.in/search?q={keyword}'
+    r = requests.get(link).text
+    soup = bs(r, "lxml")
+    manga_results = soup.find_all("a", class_="tooltips")
+    manga_ind = 0
+    for i in manga_results:
+        manga = {}
+        manga["title"] = i["title"]
+        manga["cover"] = i.find("img")["src"]
+        ln = requests.get(i.get("href")).text
+        soup = bs(ln, 'lxml')
+        chapters = soup.find_all('li', class_='row')
+        ch_list = []
+        for j in chapters:
+            l = j.find('a')
+            l = l.get('href')
+            ch_list.append(l)
+        manga["chapters"] = ch_list
+
+        manga_res[manga_ind] = manga
+        manga_ind += 1
+    return (manga_res)
+
+
+@app.get("/manga/{manga_name}")
+def get_manga(manga_name: str):
+    manga_name = manga_name.replace(" ", "-")
+    ch_list = []
+    manga = requests.get(f'https://mangapanda.in/manga/{manga_name}').text
+    soup = bs(manga, 'lxml')
+    chapters = soup.find_all('li', class_='row')
+    for i in chapters:
+        l = i.find('a')
+        l = l.get('href')
+        ch_list.append(l)
+    return get_chapters(ch_list)
