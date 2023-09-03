@@ -12,6 +12,16 @@ anime_list = {}
 manga_res = {}
 
 
+def get_search(i):
+    ln = requests.get(i.get("href")).text
+    soup = bs(ln, 'lxml')
+    chapters = soup.find_all('li', class_='row')
+    manga = {}
+    manga["cover"] = i.find("img")["src"]
+    manga["number of chapters"] = len(chapters)
+    manga_res[i["title"]] = manga
+
+
 def get_chapters(link):
     ch = link.split("-")[-1]
     ln = requests.get(link).text
@@ -141,20 +151,25 @@ def manga():
 
 @app.get("/manga/search")
 def search(keyword: str = None):
+    manga_res.clear()
     if keyword == None:
         return {"Error": "enter a keyword"}
     link = f'https://mangapanda.in/search?q={keyword}'
     r = requests.get(link).text
     soup = bs(r, "lxml")
     manga_results = soup.find_all("a", class_="tooltips")
-    for i in manga_results:
-        ln = requests.get(i.get("href")).text
-        soup = bs(ln, 'lxml')
-        chapters = soup.find_all('li', class_='row')
-        manga = {}
-        manga["cover"] = i.find("img")["src"]
-        manga["number of chapters"] = len(chapters)
-        manga_res[i["title"]] = manga
+    # for i in manga_results:
+    #     ln = requests.get(i.get("href")).text
+    #     soup = bs(ln, 'lxml')
+    #     chapters = soup.find_all('li', class_='row')
+    #     manga = {}
+    #     manga["cover"] = i.find("img")["src"]
+    #     manga["number of chapters"] = len(chapters)
+    #     manga_res[i["title"]] = manga
+    pool = ThreadPool(5)
+    pool.map(get_search, manga_results)
+    print(pool.close())
+    print(pool.join())
     return (manga_res)
 
 
