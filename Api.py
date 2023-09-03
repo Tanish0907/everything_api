@@ -5,24 +5,23 @@ from pytube import YouTube, Search
 from bs4 import BeautifulSoup as bs
 import requests
 import pytube.contrib.playlist as pl
+from multiprocessing.dummy import Pool as ThreadPool
+
+ch_dict = {}
+anime_list = {}
+manga_res = {}
 
 
-def get_chapters(ch_list):
-    ch_dict = {}
-    for i in ch_list:
-        ch = i.split("-")[-1]
-        ln = requests.get(i).text
-        soup = bs(ln, 'lxml')
-        page = soup.find('p')
-        mang_page_link = list(page.text.split(","))
-        ch_dict[ch] = mang_page_link
-    return (ch_dict)
+def get_chapters(link):
+    ch = link.split("-")[-1]
+    ln = requests.get(link).text
+    soup = bs(ln, 'lxml')
+    page = soup.find('p')
+    mang_page_link = list(page.text.split(","))
+    ch_dict[ch] = mang_page_link
 
 
 app = FastAPI()
-
-anime_list = {}
-manga_res = {}
 
 
 @app.get("/")
@@ -148,35 +147,30 @@ def search(keyword: str = None):
     r = requests.get(link).text
     soup = bs(r, "lxml")
     manga_results = soup.find_all("a", class_="tooltips")
-    manga_ind = 0
     for i in manga_results:
-        manga = {}
-        manga["title"] = i["title"]
-        manga["cover"] = i.find("img")["src"]
         ln = requests.get(i.get("href")).text
         soup = bs(ln, 'lxml')
         chapters = soup.find_all('li', class_='row')
-        ch_list = []
-        for j in chapters:
-            l = j.find('a')
-            l = l.get('href')
-            ch_list.append(l)
-        manga["chapters"] = ch_list
-
-        manga_res[manga_ind] = manga
-        manga_ind += 1
+        manga = {}
+        manga["cover"] = i.find("img")["src"]
+        manga["number of chapters"] = len(chapters)
+        manga_res[i["title"]] = manga
     return (manga_res)
 
 
 @app.get("/manga/{manga_name}")
 def get_manga(manga_name: str):
     manga_name = manga_name.replace(" ", "-")
-    ch_list = []
     manga = requests.get(f'https://mangapanda.in/manga/{manga_name}').text
     soup = bs(manga, 'lxml')
     chapters = soup.find_all('li', class_='row')
+    ch_list = []
     for i in chapters:
         l = i.find('a')
         l = l.get('href')
         ch_list.append(l)
-    return get_chapters(ch_list)
+    pool = ThreadPool(50)
+    pool.map(get_chapters, ch_list)
+    print(pool.close())
+    print(pool.join())
+    return ch_dict
