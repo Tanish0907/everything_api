@@ -92,17 +92,23 @@ def anime():
 
 
 @app.get("/anime/search")
-def get_anime(name: Optional[str] = None):
+def get_anime(name: str = None):
     anime_list.clear()
     link = f'https://gogoanimehd.to/search.html?keyword={name}'
     r = requests.get(link).text
     soup = bs(r, "lxml")
     search_res = soup.find('ul', class_="items")
-    links = search_res.find_all("a")
+    links = search_res.find_all("li")
     for i in links:
-        if ('Dub' in i['title']):
-            anime_list[i['title']
-                       ] = f"https://gogoanimehd.to{i.get('href')}"
+        anime = {}
+        l = i.find("a").get("href")
+        anime["link"] = f"https://gogoanimehd.to{l}"
+        anime["poster"] = i.find("a").find("img")["src"]
+        anime["release-year"] = i.find("p", class_="released").text.split(
+            ":")[-1].replace(" ", "").replace("\t", "")
+        anime_list[i.find("a")['title']
+                   ] = anime
+
     return (anime_list)
 
 
