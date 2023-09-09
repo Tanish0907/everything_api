@@ -10,6 +10,25 @@ from multiprocessing.dummy import Pool as ThreadPool
 ch_dict = {}
 anime_list = {}
 manga_res = {}
+embad_lst = []
+download_lst = []
+f_anime = {}
+
+
+def extract_download_link(i):
+    r = requests.get(i).text
+    soup = bs(r, "lxml")
+    download_link = soup.find("li", class_="dowloads")
+    download_link = download_link.find("a").get('href')
+    download_lst.append(download_link)
+
+
+def extract_embad_link(link):
+    r = requests.get(link).text
+    soup = bs(r, 'lxml')
+    embad = soup.find("li", class_="filelions")
+    embad = embad.find("a")["data-video"]
+    embad_lst.append(embad)
 
 
 def get_search(i):
@@ -17,6 +36,7 @@ def get_search(i):
     soup = bs(ln, 'lxml')
     chapters = soup.find_all('li', class_='row')
     manga = {}
+    manga["link"] = i.get("href")
     manga["cover"] = i.find("img")["src"]
     manga["number of chapters"] = len(chapters)
     manga_res[i["title"]] = manga
@@ -92,22 +112,30 @@ def anime():
 
 
 @app.get("/anime/search")
-def get_anime(name: str = None):
+def get_anime(keyword: str = None):
     anime_list.clear()
-    link = f'https://gogoanimehd.to/search.html?keyword={name}'
+    link = f'https://gogoanimehd.to/search.html?keyword={keyword}'
     r = requests.get(link).text
     soup = bs(r, "lxml")
     search_res = soup.find('ul', class_="items")
     links = search_res.find_all("li")
     for i in links:
         anime = {}
-        l = i.find("a").get("href")
-        anime["link"] = f"https://gogoanimehd.to{l}"
+        if "Dub" in i.find("a")["title"]:
+            title = i.find("a")['title'].replace("(Dub)", "")
+            link = i.find("a").get("href")
+            anime["DUB_or_SUB"] = "DUB"
+        else:
+            link = i.find("a").get("href")
+            title = i.find("a")['title']
+            anime["DUB_or_SUB"] = "SUB"
+        anime["name"] = i.find("a")["title"].replace(
+            "(", "").replace(")", "").replace(" ", "-").lower()
+        anime["link"] = f'https://gogoanimehd.to{link}'
         anime["poster"] = i.find("a").find("img")["src"]
         anime["release-year"] = i.find("p", class_="released").text.split(
             ":")[-1].replace(" ", "").replace("\t", "")
-        anime_list[i.find("a")['title']
-                   ] = anime
+        anime_list[title] = anime
 
     return (anime_list)
 
@@ -115,7 +143,7 @@ def get_anime(name: str = None):
 @app.get("/anime/{anime_name}")
 def get_anime_info(anime_name: str):
     anime_name = anime_name.replace(" ", "-")
-    anime = {}
+    f_anime.clear()
     link = f"https://gogoanimehd.to/category/{anime_name}"
     r = requests.get(link).text
     soup = bs(r, 'lxml')
@@ -131,31 +159,38 @@ def get_anime_info(anime_name: str):
     genre = []
     for i in anime_details[2].find_all("a"):
         genre.append(i["title"])
-    anime["name"] = anime_name
-    anime["genre"] = genre
-    anime["poster"] = poster
-    anime["episodes"] = total_ep
-    anime["watch_online"] = []
-    anime["download_links"] = []
+    if "dub" in anime_name:
+        f_anime["SUB_or_DUB"] = "DUB"
+    else:
+        f_anime["SUB_or_DUB"] = "SUB"
+    f_anime["name"] = anime_name
+    f_anime["genre"] = genre
+    f_anime["poster"] = poster
+    f_anime["episodes"] = total_ep
+    f_anime["watch_online"] = []
+
     for i in range(1, total_ep+1):
         link = f"https://gogoanimehd.to/{anime_name}"
         x = str(i)
-        anime["watch_online"].append(f'{link}-episode-{x}')
-    for i in anime["watch_online"]:
-        r = requests.get(i).text
-        soup = bs(r, "lxml")
-        download_link = soup.find("li", class_="dowloads")
-        download_link = download_link.find("a").get('href')
-        anime["download_links"].append(download_link)
-    return anime
+        f_anime["watch_online"].append(f'{link}-episode-{x}')
+    embad_lst.clear()
+    download_lst.clear()
+    pool = ThreadPool(100)
+    pool.map(extract_embad_link, f_anime["watch_online"])
+    # pool.map(extract_download_link, f_anime["watch_online"])
+    print(pool.close())
+    print(pool.join())
+    f_anime["watch_online"] = embad_lst
+    # f_anime["download_link"] = download_lst
+    return (f_anime)
 
 
-@app.get("/manga")
+@app.get("/books/manga")
 def manga():
     return {"manga": "working"}
 
 
-@app.get("/manga/search")
+@app.get("/books/manga/search")
 def search(keyword: str = None):
     manga_res.clear()
     if keyword == None:
@@ -179,9 +214,9 @@ def search(keyword: str = None):
     return (manga_res)
 
 
-@app.get("/manga/{manga_name}")
+@app.get("/books/manga/{manga_name}")
 def get_manga(manga_name: str):
-    manga_name = manga_name.replace(" ", "-")
+    manga_name = manga_name.replace(" ", "-").lower()
     manga = requests.get(f'https://mangapanda.in/manga/{manga_name}').text
     soup = bs(manga, 'lxml')
     chapters = soup.find_all('li', class_='row')
@@ -195,3 +230,8 @@ def get_manga(manga_name: str):
     print(pool.close())
     print(pool.join())
     return ch_dict
+
+
+@app.get("/books/comics")
+def comics():
+    return ({"comics": "working"})

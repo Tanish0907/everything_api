@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standatd]
+Beautifulsoup4
+lxml
+requests
+pytube
