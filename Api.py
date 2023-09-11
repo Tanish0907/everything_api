@@ -22,7 +22,10 @@ def extract_comic_links(i):
     title=i.find("img")["title"].replace(" ","-").replace("(","").replace(")","").lower()
     poster=i.find("img")["src"]
     comic["link"]=link
-    comic["poster"]=f"https://readcomiconline.li{poster}"
+    if "http" in poster:
+        comic["poster"]=poster
+    else:    
+        comic["poster"]=f"https://readcomiconline.li{poster}"
     comic_books[title]=comic
 
 def extract_download_link(i):
