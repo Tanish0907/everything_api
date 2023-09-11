@@ -13,7 +13,17 @@ manga_res = {}
 embad_lst = []
 download_lst = []
 f_anime = {}
+comic_books={}
 
+def extract_comic_links(i):
+    comic={}
+    link=i.find("a").get("href")
+    link=f"https://readcomiconline.li{link}"
+    title=i.find("img")["title"].replace(" ","-").replace("(","").replace(")","").lower()
+    poster=i.find("img")["src"]
+    comic["link"]=link
+    comic["poster"]=f"https://readcomiconline.li{poster}"
+    comic_books[title]=comic
 
 def extract_download_link(i):
     r = requests.get(i).text
@@ -235,3 +245,16 @@ def get_manga(manga_name: str):
 @app.get("/books/comics")
 def comics():
     return ({"comics": "working"})
+
+@app.get("/books/comics/search")
+def get_comics(keyword):
+    comic_books.clear()
+    r=requests.get(f"https://readcomiconline.li/Search/Comic/{keyword}").text
+    soup=bs(r,'lxml')
+    comics=soup.find_all("div",class_="col cover")
+    pool=ThreadPool(5)
+    pool.map(extract_comic_links,comics)
+    pool.close()
+    pool.join()
+    return(comic_books)
+    

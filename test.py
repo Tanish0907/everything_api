@@ -159,48 +159,68 @@ def extract_embad_link(link):
 
 #     print(anime_list)
 
-f_anime = {}
+# f_anime = {}
 
 
-def get_anime_info(anime_name: str):
-    anime_name = anime_name.replace(" ", "-")
-    f_anime.clear()
-    link = f"https://gogoanimehd.to/category/{anime_name}"
-    r = requests.get(link).text
-    soup = bs(r, 'lxml')
-    if soup == None:
-        return {"Error": "Anime title not found"}
-    poster = soup.find("div", class_="anime_info_body_bg")
-    poster = poster.find("img")["src"]
-    total_ep = soup.find('ul', {'id': 'episode_page'})
-    total_ep = total_ep.find_all("a")
-    total_ep = total_ep[len(total_ep)-1]["ep_end"]
-    total_ep = int(total_ep)
-    anime_details = soup.find_all("p", class_="type")
-    genre = []
-    for i in anime_details[2].find_all("a"):
-        genre.append(i["title"])
-    f_anime["name"] = anime_name
-    f_anime["genre"] = genre
-    f_anime["poster"] = poster
-    f_anime["episodes"] = total_ep
-    f_anime["watch_online"] = []
+# def get_anime_info(anime_name: str):
+#     anime_name = anime_name.replace(" ", "-")
+#     f_anime.clear()
+#     link = f"https://gogoanimehd.to/category/{anime_name}"
+#     r = requests.get(link).text
+#     soup = bs(r, 'lxml')
+#     if soup == None:
+#         return {"Error": "Anime title not found"}
+#     poster = soup.find("div", class_="anime_info_body_bg")
+#     poster = poster.find("img")["src"]
+#     total_ep = soup.find('ul', {'id': 'episode_page'})
+#     total_ep = total_ep.find_all("a")
+#     total_ep = total_ep[len(total_ep)-1]["ep_end"]
+#     total_ep = int(total_ep)
+#     anime_details = soup.find_all("p", class_="type")
+#     genre = []
+#     for i in anime_details[2].find_all("a"):
+#         genre.append(i["title"])
+#     f_anime["name"] = anime_name
+#     f_anime["genre"] = genre
+#     f_anime["poster"] = poster
+#     f_anime["episodes"] = total_ep
+#     f_anime["watch_online"] = []
 
-    for i in range(1, total_ep+1):
-        link = f"https://gogoanimehd.to/{anime_name}"
-        x = str(i)
-        f_anime["watch_online"].append(f'{link}-episode-{x}')
-    embad_lst.clear()
-    download_lst.clear()
-    pool = ThreadPool(100)
-    pool.map(extract_embad_link, f_anime["watch_online"])
-    # pool.map(extract_download_link, f_anime["watch_online"])
-    print(pool.close())
-    print(pool.join())
-    print(embad_lst)
-    f_anime["watch_online"] = embad_lst
-    # f_anime["download_link"] = download_lst
-    print(f_anime)
+#     for i in range(1, total_ep+1):
+#         link = f"https://gogoanimehd.to/{anime_name}"
+#         x = str(i)
+#         f_anime["watch_online"].append(f'{link}-episode-{x}')
+#     embad_lst.clear()
+#     download_lst.clear()
+#     pool = ThreadPool(100)
+#     pool.map(extract_embad_link, f_anime["watch_online"])
+#     # pool.map(extract_download_link, f_anime["watch_online"])
+#     print(pool.close())
+#     print(pool.join())
+#     print(embad_lst)
+#     f_anime["watch_online"] = embad_lst
+#     # f_anime["download_link"] = download_lst
+#     print(f_anime)
 
+comic_books={}
+def extract_comic_links(i):
+    comic={}
+    link=i.find("a").get("href")
+    link=f"https://readcomiconline.li{link}"
+    title=i.find("img")["title"].replace(" ","-").replace("(","").replace(")","").lower()
+    poster=i.find("img")["src"]
+    comic["link"]=link
+    comic["poster"]=f"https://readcomiconline.li{poster}"
+    comic_books[title]=comic
+def get_comics(keyword):
+    r=requests.get(f"https://readcomiconline.li/Search/Comic/{keyword}").text
+    soup=bs(r,'lxml')
+    comics=soup.find_all("div",class_="col cover")
+    pool=ThreadPool(5)
+    pool.map(extract_comic_links,comics)
+    pool.close()
+    pool.join()
+    print(comic_books)
+    
 
-get_anime_info("jujutsu-kaisen-tv-dub")
+get_comics("invincible")
