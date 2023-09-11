@@ -254,7 +254,7 @@ def get_comics(keyword):
     comics=soup.find_all("div",class_="col cover")
     pool=ThreadPool(5)
     pool.map(extract_comic_links,comics)
-    pool.close()
-    pool.join()
-    return(comic_books)
+    print(pool.close())
+    print(pool.join())
+    return comic_books
     
