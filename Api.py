@@ -247,7 +247,8 @@ def comics():
     return ({"comics": "working"})
 
 @app.get("/books/comics/search")
-def get_comics(keyword):
+def get_comics(keyword:str=None):
+    comic_books.clear()
     r=requests.get(f"https://readcomiconline.li/Search/Comic/{keyword}").text
     soup=bs(r,'lxml')
     comics=soup.find_all("div",class_="col cover")
