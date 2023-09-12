@@ -1,5 +1,5 @@
-fastapi[all]
-uvicorn[standatd]
+fastapi
+uvicorn
 Beautifulsoup4
 lxml
 requests
