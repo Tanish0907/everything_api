@@ -69,7 +69,7 @@ app = FastAPI()
 
 @app.get("/")
 def home():
-    return {"Success": "api is up and running"}
+    return {"Success": "api is up and running,gg"}
 
 
 @app.get("/youtube/search")
