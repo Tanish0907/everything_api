@@ -202,25 +202,62 @@ def extract_embad_link(link):
 #     # f_anime["download_link"] = download_lst
 #     print(f_anime)
 
-comic_books={}
-def extract_comic_links(i):
-    comic={}
-    link=i.find("a").get("href")
-    link=f"https://readcomiconline.li{link}"
-    title=i.find("img")["title"].replace(" ","-").replace("(","").replace(")","").lower()
-    poster=i.find("img")["src"]
-    comic["link"]=link
-    comic["poster"]=f"https://readcomiconline.li{poster}"
-    comic_books[title]=comic
-def get_comics(keyword):
-    r=requests.get(f"https://readcomiconline.li/Search/Comic/{keyword}").text
-    soup=bs(r,'lxml')
-    comics=soup.find_all("div",class_="col cover")
-    pool=ThreadPool(5)
-    pool.map(extract_comic_links,comics)
-    pool.close()
-    pool.join()
-    print(comic_books)
-    
+# comic_books={}
+# def extract_comic_links(i):
+#     comic={}
+#     link=i.find("a").get("href")
+#     link=f"https://readcomiconline.li{link}"
+#     title=i.find("img")["title"].replace(" ","-").replace("(","").replace(")","").lower()
+#     poster=i.find("img")["src"]
+#     comic["link"]=link
+#     comic["poster"]=f"https://readcomiconline.li{poster}"
+#     comic_books[title]=comic
+# def get_comics(keyword):
+#     r=requests.get(f"https://readcomiconline.li/Search/Comic/{keyword}").text
+#     soup=bs(r,'lxml')
+#     comics=soup.find_all("div",class_="col cover")
+#     pool=ThreadPool(5)
+#     pool.map(extract_comic_links,comics)
+#     pool.close()
+#     pool.join()
+#     print(comic_books)
 
-get_comics("invincible")
+
+   
+issue_dict={}
+issues_lst=[]
+def get_comic(comicname):
+    print(f'scanning for {comicname}.....')
+    link = f'https://comicextra.net/comic/{comicname}'
+    ln = requests.get(link).text
+    soup = bs(ln, 'lxml')
+    issues = soup.find('table', class_="table")
+    if (issues == None):
+        print(f'comic:{comicname} not found')
+        exit()
+    else:
+        issue_link = issues.find_all('a')
+
+        
+        for i in issue_link:
+            issues_lst.append(i.get('href')+'/full')
+    print(issues_lst)
+
+def get_issue(i):
+        links=[]
+        ln = requests.get(i).text
+        soup = bs(ln, "lxml")
+        pages = soup.find('div', class_="chapter-container")
+        page_link = pages.find_all('img')
+        for j in page_link:
+            links.append(j.get('src'))
+        x = i.find('issue')
+        issue_dict[i[x::].replace("/", "-")] = links
+
+
+get_comic("invincible")
+pool=ThreadPool(5)
+pool.map(get_issue,issues_lst)
+pool.close()
+pool.join()
+print(issue_dict)
