@@ -16,20 +16,24 @@ f_anime = {}
 comic_books={}
 issue_dict={}
 issues_lst=[]
+comic_book={}
 
-def extract_comic_links(i):
+def get_comic_details(i):
     comic={}
-    link=i.find("a").get("href")
-    link=f"https://readcomiconline.li{link}"
-    title=i.find("img")["title"].replace(" ","-").replace("(","").replace(")","").lower()
-    poster=i.find("img")["src"]
-    comic["link"]=link
-    if "http" in poster:
-        comic["poster"]=poster
-    else:    
-        comic["poster"]=f"https://readcomiconline.li{poster}"
-    comic_books[title]=comic
-
+    ancor=i.find("a",class_="image")
+    poster=ancor.find("img")["src"]
+    ancor=ancor.get("href")
+    title=ancor.split("/")[-1]
+    detail=i.find_all("div",class_="detail")
+    status=detail[1].text.split(":")
+    released=detail[2].text.split(":")
+    comic["link"]=ancor
+    comic["poster"]=poster
+    comic[status[0]]=status[-1].replace("\n","")
+    comic[released[0]]=released[-1].replace("\n","")
+    comic_book[title]=comic
+    
+    
 def extract_download_link(i):
     r = requests.get(i).text
     soup = bs(r, "lxml")
@@ -262,17 +266,20 @@ def get_manga(manga_name: str):
 def comics():
     return ({"comics": "working"})
 
-# @app.get("/books/comics/search")
-# def search(keyword:str=None):
-#     comic_books.clear()
-#     r=requests.get(f"https://readcomiconline.li/Search/Comic/{keyword}").text
-#     soup=bs(r,'lxml')
-#     comics=soup.find_all("div",class_="col cover")
-#     pool=ThreadPool(5)
-#     pool.map(extract_comic_links,comics)
-#     print(pool.close())
-#     print(pool.join())
-#     return comic_books
+@app.get("/books/comics/search")
+def search(keyword:str=None):
+    comic_books.clear()
+    link=f"https://comicextra.net/comic-search?key={keyword}"
+    r=requests.get(link).text
+    soup=bs(r,'lxml')
+    soup=soup.find("div",class_="movie-list-index home-v2")
+    comics=soup.find_all("div",class_="cartoon-box")
+    pool=ThreadPool(10)
+    pool.map(get_comic_details,comics)
+    print(pool.close())
+    print(pool.join())
+    return(comic_book)
+    
 @app.get("/books/comics/{comic_name}")
 def get_comic(comic_name:str=None):
     issues_lst.clear()
@@ -295,4 +302,3 @@ def get_comic(comic_name:str=None):
     pool.join()
     return issue_dict
     
-#     return{"idk":""}

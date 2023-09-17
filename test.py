@@ -224,40 +224,62 @@ def extract_embad_link(link):
 
 
    
-issue_dict={}
-issues_lst=[]
-def get_comic(comicname):
-    print(f'scanning for {comicname}.....')
-    link = f'https://comicextra.net/comic/{comicname}'
-    ln = requests.get(link).text
-    soup = bs(ln, 'lxml')
-    issues = soup.find('table', class_="table")
-    if (issues == None):
-        print(f'comic:{comicname} not found')
-        exit()
-    else:
-        issue_link = issues.find_all('a')
+# issue_dict={}
+# issues_lst=[]
+# def get_comic(comicname):
+#     print(f'scanning for {comicname}.....')
+#     link = f'https://comicextra.net/comic/{comicname}'
+#     ln = requests.get(link).text
+#     soup = bs(ln, 'lxml')
+#     issues = soup.find('table', class_="table")
+#     if (issues == None):
+#         print(f'comic:{comicname} not found')
+#         exit()
+#     else:
+#         issue_link = issues.find_all('a')
 
         
-        for i in issue_link:
-            issues_lst.append(i.get('href')+'/full')
-    print(issues_lst)
+#         for i in issue_link:
+#             issues_lst.append(i.get('href')+'/full')
+#     print(issues_lst)
 
-def get_issue(i):
-        links=[]
-        ln = requests.get(i).text
-        soup = bs(ln, "lxml")
-        pages = soup.find('div', class_="chapter-container")
-        page_link = pages.find_all('img')
-        for j in page_link:
-            links.append(j.get('src'))
-        x = i.find('issue')
-        issue_dict[i[x::].replace("/", "-")] = links
+# def get_issue(i):
+#         links=[]
+#         ln = requests.get(i).text
+#         soup = bs(ln, "lxml")
+#         pages = soup.find('div', class_="chapter-container")
+#         page_link = pages.find_all('img')
+#         for j in page_link:
+#             links.append(j.get('src'))
+#         x = i.find('issue')
+#         issue_dict[i[x::].replace("/", "-")] = links
+comic_books={}
+def get_comic_details(i):
+    comic={}
+    ancor=i.find("a",class_="image")
+    poster=ancor.find("img")["src"]
+    ancor=ancor.get("href")
+    title=ancor.split("/")[-1]
+    detail=i.find_all("div",class_="detail")
+    status=detail[1].text.split(":")
+    released=detail[2].text.split(":")
+    comic["link"]=ancor
+    comic["poster"]=poster
+    comic[status[0]]=status[-1].replace("\n","")
+    comic[released[0]]=released[-1].replace("\n","")
+    comic_books[title]=comic
+    
+def search(keyword:str=None):
+    link=f"https://comicextra.net/comic-search?key={keyword}"
+    r=requests.get(link).text
+    soup=bs(r,'lxml')
+    soup=soup.find("div",class_="movie-list-index home-v2")
+    comics=soup.find_all("div",class_="cartoon-box")
+    pool=ThreadPool(5)
+    pool.map(get_comic_details,comics)
+    pool.close()
+    pool.join()
+    print(comic_books)
 
+search("invincible")
 
-get_comic("invincible")
-pool=ThreadPool(5)
-pool.map(get_issue,issues_lst)
-pool.close()
-pool.join()
-print(issue_dict)
