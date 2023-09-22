@@ -1,3 +1,3 @@
 # everything_api
 render
-<h1>do linlk/docs for documentation</h1>
+<h1>go https://everything-api-qi4a.onrender.com/docs for documentation</h1>
