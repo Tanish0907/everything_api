@@ -205,7 +205,7 @@ def get_anime_info(anime_name: str):
         f_anime["watch_online"].append(f'{link}-episode-{x}')
     embad_lst.clear()
     download_lst.clear()
-    pool = ThreadPool(100)
+    pool = ThreadPool(50)
     pool.map(extract_embad_link, f_anime["watch_online"])
     # pool.map(extract_download_link, f_anime["watch_online"])
     print(pool.close())
@@ -237,7 +237,7 @@ def search(keyword: str = None):
     #     manga["cover"] = i.find("img")["src"]
     #     manga["number of chapters"] = len(chapters)
     #     manga_res[i["title"]] = manga
-    pool = ThreadPool(5)
+    pool = ThreadPool(50)
     pool.map(get_search, manga_results)
     print(pool.close())
     print(pool.join())
@@ -296,7 +296,7 @@ def get_comic(comic_name:str=None):
         for i in issue_link:
             issues_lst.append(i.get('href')+'/full')
             
-    pool=ThreadPool(100)
+    pool=ThreadPool(50)
     pool.map(get_issue,issues_lst)
     pool.close()
     pool.join()
