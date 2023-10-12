@@ -1,7 +1,8 @@
-import requests
-from bs4 import BeautifulSoup as bs
-from multiprocessing.dummy import Pool as ThreadPool
+# import requests
+# from bs4 import BeautifulSoup as bs
+# from multiprocessing.dummy import Pool as ThreadPool
 # manga_res = {}
+# from raincoat import search
 
 '''
         ln = requests.get(i["link"]).text
@@ -114,26 +115,26 @@ from multiprocessing.dummy import Pool as ThreadPool
 # print(pool.join())
 
 # print(ch_dict)
-anime_list = {}
+# anime_list = {}
 
-embad_lst = []
-download_lst = []
-
-
-def extract_download_link(i):
-    r = requests.get(i).text
-    soup = bs(r, "lxml")
-    download_link = soup.find("li", class_="dowloads")
-    download_link = download_link.find("a").get('href')
-    download_lst.append(download_link)
+# embad_lst = []
+# download_lst = []
 
 
-def extract_embad_link(link):
-    r = requests.get(link).text
-    soup = bs(r, 'lxml')
-    embad = soup.find("li", class_="filelions")
-    embad = embad.find("a")["data-video"]
-    embad_lst.append(embad)
+# def extract_download_link(i):
+#     r = requests.get(i).text
+#     soup = bs(r, "lxml")
+#     download_link = soup.find("li", class_="dowloads")
+#     download_link = download_link.find("a").get('href')
+#     download_lst.append(download_link)
+
+
+# def extract_embad_link(link):
+#     r = requests.get(link).text
+#     soup = bs(r, 'lxml')
+#     embad = soup.find("li", class_="filelions")
+#     embad = embad.find("a")["data-video"]
+#     embad_lst.append(embad)
 
 
 # def get_anime(name: str = None):
@@ -253,33 +254,34 @@ def extract_embad_link(link):
 #             links.append(j.get('src'))
 #         x = i.find('issue')
 #         issue_dict[i[x::].replace("/", "-")] = links
-comic_books={}
-def get_comic_details(i):
-    comic={}
-    ancor=i.find("a",class_="image")
-    poster=ancor.find("img")["src"]
-    ancor=ancor.get("href")
-    title=ancor.split("/")[-1]
-    detail=i.find_all("div",class_="detail")
-    status=detail[1].text.split(":")
-    released=detail[2].text.split(":")
-    comic["link"]=ancor
-    comic["poster"]=poster
-    comic[status[0]]=status[-1].replace("\n","")
-    comic[released[0]]=released[-1].replace("\n","")
-    comic_books[title]=comic
+# comic_books={}
+# def get_comic_details(i):
+#     comic={}
+#     ancor=i.find("a",class_="image")
+#     poster=ancor.find("img")["src"]
+#     ancor=ancor.get("href")
+#     title=ancor.split("/")[-1]
+#     detail=i.find_all("div",class_="detail")
+#     status=detail[1].text.split(":")
+#     released=detail[2].text.split(":")
+#     comic["link"]=ancor
+#     comic["poster"]=poster
+#     comic[status[0]]=status[-1].replace("\n","")
+#     comic[released[0]]=released[-1].replace("\n","")
+#     comic_books[title]=comic
     
-def search(keyword:str=None):
-    link=f"https://comicextra.net/comic-search?key={keyword}"
-    r=requests.get(link).text
-    soup=bs(r,'lxml')
-    soup=soup.find("div",class_="movie-list-index home-v2")
-    comics=soup.find_all("div",class_="cartoon-box")
-    pool=ThreadPool(5)
-    pool.map(get_comic_details,comics)
-    pool.close()
-    pool.join()
-    print(comic_books)
+# def search(keyword:str=None):
+#     link=f"https://comicextra.net/comic-search?key={keyword}"
+#     r=requests.get(link).text
+#     soup=bs(r,'lxml')
+#     soup=soup.find("div",class_="movie-list-index home-v2")
+#     comics=soup.find_all("div",class_="cartoon-box")
+#     pool=ThreadPool(5)
+#     pool.map(get_comic_details,comics)
+#     pool.close()
+#     pool.join()
+#     print(comic_books)
 
-search("invincible")
+# search("invincible")
 
+# print(search("jujutsu"))
