@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as bs
 import requests
 import pytube.contrib.playlist as pl
 from multiprocessing.dummy import Pool as ThreadPool
+from functools import partial
 
 ch_dict = {}
 anime_list = {}
@@ -69,7 +70,15 @@ def get_chapters(link):
     page = soup.find('p')
     mang_page_link = list(page.text.split(","))
     ch_dict[ch] = mang_page_link
-
+def get_rmanga_ch(i,manganame):
+        manga=requests.get(f'https://rmanga.app/{manganame}/chapter-{i}/all-pages').text
+        soup=bs(manga,'lxml')
+        pages=soup.find("div",class_="chapter-detail-novel-big-image text-center")
+        pages=pages.find_all("img")
+        pg_lst=[]
+        for j in pages:
+            pg_lst.append(j.get("src"))
+        ch_dict[i]=pg_lst
 def get_issue(i):
         links=[]
         ln = requests.get(i).text
@@ -225,43 +234,52 @@ def search(keyword: str = None):
     manga_res.clear()
     if keyword == None:
         return {"Error": "enter a keyword"}
+  
     link = f'https://mangapanda.in/search?q={keyword}'
     r = requests.get(link).text
     soup = bs(r, "lxml")
     manga_results = soup.find_all("a", class_="tooltips")
-    # for i in manga_results:
-    #     ln = requests.get(i.get("href")).text
-    #     soup = bs(ln, 'lxml')
-    #     chapters = soup.find_all('li', class_='row')
-    #     manga = {}
-    #     manga["cover"] = i.find("img")["src"]
-    #     manga["number of chapters"] = len(chapters)
-    #     manga_res[i["title"]] = manga
     pool = ThreadPool(100)
     pool.map(get_search, manga_results)
     print(pool.close())
     print(pool.join())
     return (manga_res)
-
+    
 
 @app.get("/books/manga/{manga_name}")
-def get_manga(manga_name: str):
+def get_manga(manga_name: str,source:Optional[str]=None):
     manga_name = manga_name.replace(" ", "-").lower()
-    manga = requests.get(f'https://mangapanda.in/manga/{manga_name}').text
-    soup = bs(manga, 'lxml')
-    chapters = soup.find_all('li', class_='row')
-    ch_list = []
-    for i in chapters:
-        l = i.find('a')
-        l = l.get('href')
-        ch_list.append(l)
-    pool = ThreadPool(100)
-    pool.map(get_chapters, ch_list)
-    print(pool.close())
-    print(pool.join())
-    return ch_dict
-
-
+    if source == "mangapanda"or source==None:
+        manga = requests.get(f'https://mangapanda.in/manga/{manga_name}').text
+        soup = bs(manga, 'lxml')
+        chapters = soup.find_all('li', class_='row')
+        ch_list = []
+        for i in chapters:
+            l = i.find('a')
+            l = l.get('href')
+            ch_list.append(l)
+        pool = ThreadPool(100)
+        pool.map(get_chapters, ch_list)
+        print(pool.close())
+        print(pool.join())
+        return ch_dict
+    elif source=="rmanga":
+        ch_no=requests.get(f'https://rmanga.app/{manga_name}/chapter-1/all-pages').text
+        soup=bs(ch_no,'lxml')
+        ch_total=soup.find_all("option")
+        ch_total=soup.find_all("option")
+        ch=[]
+        for i in ch_total:
+            try :
+                eval(i.text.split(" ")[-1])
+                ch.append(int(i.text.split(" ")[-1]))
+            except:
+                pass
+        pool=ThreadPool(100)
+        pool.map(partial(get_rmanga_ch,manganame=manga_name),ch)
+        print(pool.close())
+        print(pool.join())
+        return ch_dict
 @app.get("/books/comics")
 def comics():
     return ({"comics": "working"})
