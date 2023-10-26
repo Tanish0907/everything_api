@@ -20,7 +20,6 @@ comic_books={}
 issue_dict={}
 issues_lst=[]
 comic_book={}
-
 def get_comic_details(i):
     comic={}
     ancor=i.find("a",class_="image")
@@ -45,13 +44,16 @@ def extract_download_link(i):
     download_lst.append(download_link)
 
 
-def extract_m3u8_link(a:GogoAnime,dict:dict):
+def extract_m3u8_link(dict:dict):
+    s=Session()
+    a=GogoAnime(s)
     m3u8_links={}
     id=dict["id"]
     ep=dict["number"]
     m3u8_data=a.fetchEpisodeSources(id)
     for i in m3u8_data["sources"]:
         m3u8_links[i["quality"]]=i["url"]
+    s.close()
     return ep,m3u8_links
 
     
@@ -161,6 +163,7 @@ def get_anime(keyword: str = None):
     s=Session()
     gogo=GogoAnime(s)
     anime_list=gogo.search(query=keyword)
+    s.close()
     return (anime_list)
 
 
@@ -175,49 +178,11 @@ def get_anime_info(anime_name: str):
     f_anime["poster"] = anime["image"]
     f_anime["episodes"] = anime["totalEpisodes"]
     f_anime["m3u8"] = {}
-    for i in anime["episodes"]:
-        ep,links=extract_m3u8_link(gogo,i)
-        f_anime["m3u8"][ep]=links
-        
-    
-    # anime_name = anime_name.replace(" ", "-")
-    # f_anime.clear()
-    # link = f"https://gogoanimehd.to/category/{anime_name}"
-    # r = requests.get(link).text
-    # soup = bs(r, 'lxml')
-    # if soup == None:
-    #     return {"Error": "Anime title not found"}
-    # poster = soup.find("div", class_="anime_info_body_bg")
-    # poster = poster.find("img")["src"]
-    # total_ep = soup.find('ul', {'id': 'episode_page'})
-    # total_ep = total_ep.find_all("a")
-    # total_ep = total_ep[len(total_ep)-1]["ep_end"]
-    # total_ep = int(total_ep)
-    # anime_details = soup.find_all("p", class_="type")
-    # genre = []
-    # for i in anime_details[2].find_all("a"):
-    #     genre.append(i["title"])
-    # if "dub" in anime_name:
-    #     f_anime["SUB_or_DUB"] = "DUB"
-    # else:
-    #     f_anime["SUB_or_DUB"] = "SUB"
-
-
-    # for i in range(1, total_ep+1):
-    #     link = f"https://gogoanimehd.to/{anime_name}"
-    #     x = str(i)
-    #     f_anime["watch_online"].append(f'{link}-episode-{x}')
-    # embad_lst.clear()
-    # download_lst.clear()
-    # pool = ThreadPool(100)
-    # pool.map(extract_embad_link, f_anime["watch_online"])
-    # # pool.map(extract_download_link, f_anime["watch_online"])
-    # print(pool.close())
-    # print(pool.join())
-    # f_anime["watch_online"] = embad_lst
-    # # f_anime["download_link"] = download_lst
+    pool=ThreadPool(100)
+    links=pool.map(extract_m3u8_link,anime["episodes"])
+    for i in links:
+        f_anime["m3u8"][i[0]]=i[1]
     return (f_anime)
-
 
 @app.get("/books/manga")
 def manga():

@@ -12,3 +12,9 @@
     <tr><td>/books/manga</td><td>MANGA</td><td>SEARCH,GET_MANGA_DATA</td></tr>
     <tr><td>/books/comics</td><td>COMICS</td><td>SEARCH,GET_COMIC_DATA</td></tr>
 </table>
+<h1>How to deploy</h1>
+<h4>Docker</h4>
+<b>sudo docker run -d --name=everything-api -p8000:8000 tanish0907/everything-api:lattest</b>
+
+# contributors 
+mukund1606<a href="https://github.com/mukund1606/consumet.py">->Consumet.py</a>
