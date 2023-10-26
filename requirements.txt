@@ -4,3 +4,4 @@ Beautifulsoup4
 lxml
 requests
 pytube
+pycryptodome

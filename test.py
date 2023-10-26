@@ -285,34 +285,40 @@
 # search("invincible")
 
 # print(search("jujutsu"))
-import requests
-from bs4 import BeautifulSoup as bs
-# manga=requests.get(f'https://rmanga.app/jujutsu-kaisen/chapter-238/all-pages').text
-# soup=bs(manga,'lxml')
-# # chapters=soup.find("div",class_="cm-tabs-conten novels-detail-chapters")
-# chapters=soup.find_all("img")
-# print(chapters)
-ch_dict={}
-def get_rmanga_ch(manga_name,ch_total):
-    for i in range(2,ch_total):
-        manga=requests.get(f'https://rmanga.app/{manga_name}/chapter-{i}/all-pages').text
-        soup=bs(manga,'lxml')
-        pages=soup.find("div",class_="chapter-detail-novel-big-image text-center")
-        pages=pages.find_all("img")
-        pg_lst=[]
-        for j in pages:
-            pg_lst.append(j.get("src"))
-        ch_dict[i]=pg_lst
-    print(ch_dict)
-ch_no=requests.get(f'https://rmanga.app/jujutsu-kaisen/chapter-1/all-pages').text
-soup=bs(ch_no,'lxml')
-ch_total=soup.find_all("option")
-ch=[]
-for i in ch_total:
-    try :
-        eval(i.text.split(" ")[-1])
-        ch.append(i.text.split(" ")[-1])
-    except:
-        pass
-get_rmanga_ch("jujutsu-kaisen",int(ch[0]))
-    
+# import requests
+# from bs4 import BeautifulSoup as bs
+# # manga=requests.get(f'https://rmanga.app/jujutsu-kaisen/chapter-238/all-pages').text
+# # soup=bs(manga,'lxml')
+# # # chapters=soup.find("div",class_="cm-tabs-conten novels-detail-chapters")
+# # chapters=soup.find_all("img")
+# # print(chapters)
+# ch_dict={}
+# def get_rmanga_ch(manga_name,ch_total):
+#     for i in range(2,ch_total):
+#         manga=requests.get(f'https://rmanga.app/{manga_name}/chapter-{i}/all-pages').text
+#         soup=bs(manga,'lxml')
+#         pages=soup.find("div",class_="chapter-detail-novel-big-image text-center")
+#         pages=pages.find_all("img")
+#         pg_lst=[]
+#         for j in pages:
+#             pg_lst.append(j.get("src"))
+#         ch_dict[i]=pg_lst
+#     print(ch_dict)
+# ch_no=requests.get(f'https://rmanga.app/jujutsu-kaisen/chapter-1/all-pages').text
+# soup=bs(ch_no,'lxml')
+# ch_total=soup.find_all("option")
+# ch=[]
+# for i in ch_total:
+#     try :
+#         eval(i.text.split(" ")[-1])
+#         ch.append(i.text.split(" ")[-1])
+#     except:
+#         pass
+# get_rmanga_ch("jujutsu-kaisen",int(ch[0]))
+from gogoanime import GogoAnime
+from requests import Session
+s=Session()
+a=GogoAnime(session=s)
+x=(a.fetchEpisodeSources(episode_id="jujutsu-kaisen-tv-dub-episode-2"))
+print(x["sources"])
+# print(a.search(query="jujutsu"))

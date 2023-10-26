@@ -7,6 +7,8 @@ import requests
 import pytube.contrib.playlist as pl
 from multiprocessing.dummy import Pool as ThreadPool
 from functools import partial
+from gogoanime import GogoAnime
+from requests import Session
 
 ch_dict = {}
 anime_list = {}
@@ -43,12 +45,16 @@ def extract_download_link(i):
     download_lst.append(download_link)
 
 
-def extract_embad_link(link):
-    r = requests.get(link).text
-    soup = bs(r, 'lxml')
-    embad = soup.find("li", class_="filelions")
-    embad = embad.find("a")["data-video"]
-    embad_lst.append(embad)
+def extract_m3u8_link(a:GogoAnime,dict:dict):
+    m3u8_links={}
+    id=dict["id"]
+    ep=dict["number"]
+    m3u8_data=a.fetchEpisodeSources(id)
+    for i in m3u8_data["sources"]:
+        m3u8_links[i["quality"]]=i["url"]
+    return ep,m3u8_links
+
+    
 
 
 def get_search(i):
@@ -152,75 +158,64 @@ def anime():
 
 @app.get("/anime/search")
 def get_anime(keyword: str = None):
-    anime_list.clear()
-    link = f'https://gogoanimehd.to/search.html?keyword={keyword}'
-    r = requests.get(link).text
-    soup = bs(r, "lxml")
-    search_res = soup.find('ul', class_="items")
-    links = search_res.find_all("li")
-    for i in links:
-        anime = {}
-        if "Dub" in i.find("a")["title"]:
-            title = i.find("a")['title'].replace("(Dub)", "")
-            link = i.find("a").get("href")
-            anime["DUB_or_SUB"] = "DUB"
-        else:
-            link = i.find("a").get("href")
-            title = i.find("a")['title']
-            anime["DUB_or_SUB"] = "SUB"
-        anime["name"] = i.find("a")["title"].replace(
-            "(", "").replace(")", "").replace(" ", "-").lower()
-        anime["link"] = f'https://gogoanimehd.to{link}'
-        anime["poster"] = i.find("a").find("img")["src"]
-        anime["release-year"] = i.find("p", class_="released").text.split(
-            ":")[-1].replace(" ", "").replace("\t", "")
-        anime_list[title] = anime
-
+    s=Session()
+    gogo=GogoAnime(s)
+    anime_list=gogo.search(query=keyword)
     return (anime_list)
 
 
 @app.get("/anime/{anime_name}")
 def get_anime_info(anime_name: str):
-    anime_name = anime_name.replace(" ", "-")
     f_anime.clear()
-    link = f"https://gogoanimehd.to/category/{anime_name}"
-    r = requests.get(link).text
-    soup = bs(r, 'lxml')
-    if soup == None:
-        return {"Error": "Anime title not found"}
-    poster = soup.find("div", class_="anime_info_body_bg")
-    poster = poster.find("img")["src"]
-    total_ep = soup.find('ul', {'id': 'episode_page'})
-    total_ep = total_ep.find_all("a")
-    total_ep = total_ep[len(total_ep)-1]["ep_end"]
-    total_ep = int(total_ep)
-    anime_details = soup.find_all("p", class_="type")
-    genre = []
-    for i in anime_details[2].find_all("a"):
-        genre.append(i["title"])
-    if "dub" in anime_name:
-        f_anime["SUB_or_DUB"] = "DUB"
-    else:
-        f_anime["SUB_or_DUB"] = "SUB"
-    f_anime["name"] = anime_name
-    f_anime["genre"] = genre
-    f_anime["poster"] = poster
-    f_anime["episodes"] = total_ep
-    f_anime["watch_online"] = []
+    s=Session()
+    gogo=GogoAnime(s)
+    anime=gogo.fetchAnimeInfo(anime_id=anime_name)
+    f_anime["name"] = anime["id"]
+    f_anime["genre"] = anime["genres"]
+    f_anime["poster"] = anime["image"]
+    f_anime["episodes"] = anime["totalEpisodes"]
+    f_anime["m3u8"] = {}
+    for i in anime["episodes"]:
+        ep,links=extract_m3u8_link(gogo,i)
+        f_anime["m3u8"][ep]=links
+        
+    
+    # anime_name = anime_name.replace(" ", "-")
+    # f_anime.clear()
+    # link = f"https://gogoanimehd.to/category/{anime_name}"
+    # r = requests.get(link).text
+    # soup = bs(r, 'lxml')
+    # if soup == None:
+    #     return {"Error": "Anime title not found"}
+    # poster = soup.find("div", class_="anime_info_body_bg")
+    # poster = poster.find("img")["src"]
+    # total_ep = soup.find('ul', {'id': 'episode_page'})
+    # total_ep = total_ep.find_all("a")
+    # total_ep = total_ep[len(total_ep)-1]["ep_end"]
+    # total_ep = int(total_ep)
+    # anime_details = soup.find_all("p", class_="type")
+    # genre = []
+    # for i in anime_details[2].find_all("a"):
+    #     genre.append(i["title"])
+    # if "dub" in anime_name:
+    #     f_anime["SUB_or_DUB"] = "DUB"
+    # else:
+    #     f_anime["SUB_or_DUB"] = "SUB"
 
-    for i in range(1, total_ep+1):
-        link = f"https://gogoanimehd.to/{anime_name}"
-        x = str(i)
-        f_anime["watch_online"].append(f'{link}-episode-{x}')
-    embad_lst.clear()
-    download_lst.clear()
-    pool = ThreadPool(100)
-    pool.map(extract_embad_link, f_anime["watch_online"])
-    # pool.map(extract_download_link, f_anime["watch_online"])
-    print(pool.close())
-    print(pool.join())
-    f_anime["watch_online"] = embad_lst
-    # f_anime["download_link"] = download_lst
+
+    # for i in range(1, total_ep+1):
+    #     link = f"https://gogoanimehd.to/{anime_name}"
+    #     x = str(i)
+    #     f_anime["watch_online"].append(f'{link}-episode-{x}')
+    # embad_lst.clear()
+    # download_lst.clear()
+    # pool = ThreadPool(100)
+    # pool.map(extract_embad_link, f_anime["watch_online"])
+    # # pool.map(extract_download_link, f_anime["watch_online"])
+    # print(pool.close())
+    # print(pool.join())
+    # f_anime["watch_online"] = embad_lst
+    # # f_anime["download_link"] = download_lst
     return (f_anime)
 
 
