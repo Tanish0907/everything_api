@@ -319,6 +319,6 @@ from gogoanime import GogoAnime
 from requests import Session
 s=Session()
 a=GogoAnime(session=s)
-x=(a.fetchEpisodeSources(episode_id="jujutsu-kaisen-tv-dub-episode-2"))
-print(x["sources"])
+x=(a.fetchAnimeInfo(anime_id="naruto"))
+print(x)
 # print(a.search(query="jujutsu"))

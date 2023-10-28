@@ -168,7 +168,7 @@ def get_anime(keyword: str = None):
 
 
 @app.get("/anime/{anime_name}")
-def get_anime_info(anime_name: str):
+def get_anime_info(anime_name: str, episode_id: Optional[int] = None):
     f_anime.clear()
     s=Session()
     gogo=GogoAnime(s)
@@ -176,12 +176,20 @@ def get_anime_info(anime_name: str):
     f_anime["name"] = anime["id"]
     f_anime["genre"] = anime["genres"]
     f_anime["poster"] = anime["image"]
-    f_anime["episodes"] = anime["totalEpisodes"]
-    f_anime["m3u8"] = {}
-    pool=ThreadPool(100)
-    links=pool.map(extract_m3u8_link,anime["episodes"])
-    for i in links:
-        f_anime["m3u8"][i[0]]=i[1]
+    f_anime["total episodes"] = anime["totalEpisodes"]
+    if episode_id == None:
+        f_anime["episodes"]=anime["episodes"]
+    elif episode_id != None:
+        f_anime["m3u8"] = {}
+        for i in anime["episodes"]:
+            if i["number"]==episode_id:
+                i=extract_m3u8_link(i)
+                f_anime["m3u8"][i[0]]=i[1]
+                break
+        # pool=ThreadPool(100)
+        # links=pool.map(extract_m3u8_link,anime["episodes"])
+        # for i in links:
+        #     f_anime["m3u8"][i[0]]=i[1]
     return (f_anime)
 
 @app.get("/books/manga")
