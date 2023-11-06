@@ -9,7 +9,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 from functools import partial
 from gogoanime import GogoAnime
 from requests import Session
-
+from torrent_search import search_torr
 ch_dict = {}
 anime_list = {}
 manga_res = {}
@@ -177,9 +177,9 @@ def get_anime_info(anime_name: str, episode_id: Optional[int] = None):
     f_anime["genre"] = anime["genres"]
     f_anime["poster"] = anime["image"]
     f_anime["total episodes"] = anime["totalEpisodes"]
-    if episode_id == None:
-        f_anime["episodes"]=anime["episodes"]
-    elif episode_id != None:
+    # if episode_id == None:
+    #     f_anime["episodes"]=anime["episodes"]
+    if episode_id != None:
         f_anime["m3u8"] = {}
         for i in anime["episodes"]:
             if i["number"]==episode_id:
@@ -288,3 +288,10 @@ def get_comic(comic_name:str=None):
     pool.join()
     return issue_dict
     
+@app.get('/torrents/search/')
+def torr_search(search_term:str=None,catagory:Optional[str]=None):
+    if search_term==None:
+        return {"Error":"enter a search term"}
+    search_term=search_term.replace(" ","+")
+    results=search_torr(catagory,search_term)
+    return results

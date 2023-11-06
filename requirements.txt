@@ -5,3 +5,6 @@ lxml
 requests
 pytube
 pycryptodome
+qbittorrent-api
+pandas
+rich
