@@ -16,7 +16,7 @@
 <h4>Build Image<h4>
 <b>sudo docker build img_name .</b>
 <h4>Docker</h4>
-<b>sudo docker run -d --name=everything-api -p8000:8000 -v path to config:/app/CONFIG tanish0907/everything-api:lattest</b>
+<b>sudo docker run -d --name=everything-api -p8000:8000 -v path to config:/app/CONFIG tanish0907/everything-api:1.9</b>
 <h4>now go to ur config folder and create a jackett.json file if u want to use torrsearch function and put the foll in file</h4>
 <b>{"url":"http:// ur ip:9117","api_key":"jackett api key"}</b>
 <h4>jackett must be setup beforehand</h4>
