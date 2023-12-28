@@ -10,39 +10,20 @@ from functools import partial
 from gogoanime import GogoAnime
 from requests import Session
 from torrent_search import search_torr
+#manag dicts/data
 ch_dict = {}
-anime_list = {}
 manga_res = {}
-embad_lst = []
-download_lst = []
+#anime dicts/data
+anime_list = {}
 f_anime = {}
+# yt_search data
+embad_lst = []
+#comic dicts/data
 comic_books={}
 issue_dict={}
 issues_lst=[]
 comic_book={}
-def get_comic_details(i):
-    comic={}
-    ancor=i.find("a",class_="image")
-    poster=ancor.find("img")["src"]
-    ancor=ancor.get("href")
-    title=ancor.split("/")[-1]
-    detail=i.find_all("div",class_="detail")
-    status=detail[1].text.split(":")
-    released=detail[2].text.split(":")
-    comic["link"]=ancor
-    comic["poster"]=poster
-    comic[status[0]]=status[-1].replace("\n","")
-    comic[released[0]]=released[-1].replace("\n","")
-    comic_book[title]=comic
-    
-    
-def extract_download_link(i):
-    r = requests.get(i).text
-    soup = bs(r, "lxml")
-    download_link = soup.find("li", class_="dowloads")
-    download_link = download_link.find("a").get('href')
-    download_lst.append(download_link)
-
+#anime functions
 
 def extract_m3u8_link(dict:dict):
     s=Session()
@@ -58,7 +39,7 @@ def extract_m3u8_link(dict:dict):
 
     
 
-
+#manga functions
 def get_search(i):
     ln = requests.get(i.get("href")).text
     soup = bs(ln, 'lxml')
@@ -78,6 +59,7 @@ def get_chapters(link):
     page = soup.find('p')
     mang_page_link = list(page.text.split(","))
     ch_dict[ch] = mang_page_link
+    
 def get_rmanga_ch(i,manganame):
         manga=requests.get(f'https://rmanga.app/{manganame}/chapter-{i}/all-pages').text
         soup=bs(manga,'lxml')
@@ -87,6 +69,9 @@ def get_rmanga_ch(i,manganame):
         for j in pages:
             pg_lst.append(j.get("src"))
         ch_dict[i]=pg_lst
+        
+#comic functions
+
 def get_issue(i):
         links=[]
         ln = requests.get(i).text
@@ -97,7 +82,21 @@ def get_issue(i):
             links.append(j.get('src'))
         x = i.find('issue')
         issue_dict[i[x::].replace("/", "-")] = links
-
+        
+def get_comic_details(i):
+    comic={}
+    ancor=i.find("a",class_="image")
+    poster=ancor.find("img")["src"]
+    ancor=ancor.get("href")
+    title=ancor.split("/")[-1]
+    detail=i.find_all("div",class_="detail")
+    status=detail[1].text.split(":")
+    released=detail[2].text.split(":")
+    comic["link"]=ancor
+    comic["poster"]=poster
+    comic[status[0]]=status[-1].replace("\n","")
+    comic[released[0]]=released[-1].replace("\n","")
+    comic_book[title]=comic
 app = FastAPI()
 
 
@@ -199,6 +198,7 @@ def manga():
 
 @app.get("/books/manga/search")
 def search(keyword: str = None):
+    
     manga_res.clear()
     if keyword == None:
         return {"Error": "enter a keyword"}
@@ -211,6 +211,7 @@ def search(keyword: str = None):
     pool.map(get_search, manga_results)
     print(pool.close())
     print(pool.join())
+
     return (manga_res)
     
 
@@ -218,6 +219,8 @@ def search(keyword: str = None):
 def get_manga(manga_name: str,source:Optional[str]=None):
     manga_name = manga_name.replace(" ", "-").lower()
     if source == "mangapanda"or source==None:
+        # idk=get_chapters_readmanga_online(search_manga(manga_name))
+        # return idk
         manga = requests.get(f'https://mangapanda.in/manga/{manga_name}').text
         soup = bs(manga, 'lxml')
         chapters = soup.find_all('li', class_='row')
@@ -248,6 +251,7 @@ def get_manga(manga_name: str,source:Optional[str]=None):
         print(pool.close())
         print(pool.join())
         return ch_dict
+    
 @app.get("/books/comics")
 def comics():
     return ({"comics": "working"})

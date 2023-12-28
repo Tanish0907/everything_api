@@ -114,7 +114,7 @@ class GogoCDN:
 
 
 class GogoAnime:
-    BASE_URL = "https://gogoanimehd.io"
+    BASE_URL = "https://gogoanime3.net/"
     ajaxUrl = "https://ajax.gogo-load.com/ajax"
 
     def __init__(self, session) -> None:
