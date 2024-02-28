@@ -4,7 +4,7 @@ import base64
 from bs4 import BeautifulSoup, Tag
 from urllib.parse import urlparse
 import json
-import requests
+import re
 
 
 class GogoCDN:
