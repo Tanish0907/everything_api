@@ -4,7 +4,7 @@
 # manga_res = {}
 # from raincoat import search
 
-'''
+"""
         ln = requests.get(i["link"]).text
         soup = bs(ln, 'lxml')
         chapters = soup.find_all('li', class_='row')
@@ -14,7 +14,7 @@
             l = l.get('href')
             ch_list.append(l)
         manga["chapters"]=ch_list
-'''
+"""
 
 
 # def get_chapters(link):
@@ -224,7 +224,6 @@
 #     print(comic_books)
 
 
-   
 # issue_dict={}
 # issues_lst=[]
 # def get_comic(comicname):
@@ -239,7 +238,7 @@
 #     else:
 #         issue_link = issues.find_all('a')
 
-        
+
 #         for i in issue_link:
 #             issues_lst.append(i.get('href')+'/full')
 #     print(issues_lst)
@@ -269,7 +268,7 @@
 #     comic[status[0]]=status[-1].replace("\n","")
 #     comic[released[0]]=released[-1].replace("\n","")
 #     comic_books[title]=comic
-    
+
 # def search(keyword:str=None):
 #     link=f"https://comicextra.net/comic-search?key={keyword}"
 #     r=requests.get(link).text
@@ -315,10 +314,20 @@
 #     except:
 #         pass
 # get_rmanga_ch("jujutsu-kaisen",int(ch[0]))
-from gogoanime import GogoAnime
+"""from gogoanime import GogoAnime
 from requests import Session
 s=Session()
 a=GogoAnime(session=s)
 x=(a.fetchAnimeInfo(anime_id="naruto"))
-print(x)
+print(x)"""
 # print(a.search(query="jujutsu"))
+"""from anime import anime
+
+a = anime("jujutsu kaisen")
+# print(a.search())
+print(a.get_anime("jujutsu-kaisen-tv"))
+"""
+from gogoanime import GoGo
+
+Anime = GoGo()
+Anime.search("One Piece")

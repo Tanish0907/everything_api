@@ -4,7 +4,7 @@ import base64
 from bs4 import BeautifulSoup, Tag
 from urllib.parse import urlparse
 import json
-import re
+import requests
 
 
 class GogoCDN:
@@ -114,7 +114,7 @@ class GogoCDN:
 
 
 class GogoAnime:
-    BASE_URL = "https://gogoanime3.net/"
+    BASE_URL = "https://gogoanime3.co/"
     ajaxUrl = "https://ajax.gogo-load.com/ajax"
 
     def __init__(self, session) -> None:
@@ -197,18 +197,18 @@ class GogoAnime:
             .strip()
             .upper()
         )
-        anime_info["status"] = "Unknown"
-        status = (
-            soup.select_one("div.anime_info_body_bg > p:nth-child(8) > a")
-            .getText()
-            .strip()
-        )
-        if status == "Ongoing":
-            anime_info["status"] = "Ongoing"
-        elif status == "Completed":
-            anime_info["status"] = "Completed"
-        elif status == "Upcoming":
-            anime_info["status"] = "Upcoming"
+        # anime_info["status"] = "Unknown"
+        # status = (
+        #     soup.select_one("div.anime_info_body_bg > p:nth-child(8) > a")
+        #     .getText()
+        #     .strip()
+        # )
+        # if status == "Ongoing":
+        #     anime_info["status"] = "Ongoing"
+        # elif status == "Completed":
+        #     anime_info["status"] = "Completed"
+        # elif status == "Upcoming":
+        #     anime_info["status"] = "Upcoming"
         anime_info["otherName"] = (
             soup.select_one("div.anime_info_body_bg > p:nth-child(9)")
             .getText()

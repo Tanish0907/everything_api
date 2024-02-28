@@ -10,6 +10,7 @@ from functools import partial
 from gogoanime import GogoAnime
 from requests import Session
 from torrent_search import search_torr
+from fastapi.middleware.cors import CORSMiddleware
 
 # manag dicts/data
 ch_dict = {}
@@ -112,6 +113,19 @@ def get_comic_details(i):
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this according to your needs. "*" allows all origins.
+    allow_credentials=True,
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+    ],  # Adjust the allowed methods as needed.
+    allow_headers=["*"],  # Adjust the allowed headers as needed.
+)
 
 
 @app.get("/")
