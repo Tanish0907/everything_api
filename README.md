@@ -14,5 +14,5 @@
 <h4>Build Image<h4>
 <b>sudo docker build img_name .</b>
 <h4>Docker</h4>
-<b>sudo docker run -d --name=everything-api -p8000:8000  tanish0907/everything-api:2.0.3</b>
+<b>sudo docker run -d --name=everything-api -p8000:8000  tanish0907/everything-api:2.0.8</b>
 
