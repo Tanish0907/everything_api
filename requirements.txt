@@ -1,10 +1,4 @@
-fastapi
-uvicorn
-Beautifulsoup4
-lxml
 requests
-pytube
-pycryptodome
-qbittorrent-api
-pandas
-rich
+bs4
+fastapi
+lxml
