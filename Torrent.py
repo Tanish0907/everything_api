@@ -4,7 +4,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 global jackett_config
 jackett_config = {
-    "api_key": "ndomlhchrpofo934rxkdj1yy2c9ps9gg",
+    "api_key": "jr8hzydappm8okpnr9dp2dzn0bmdeyje",
     "url": "https://jackett-ttda.onrender.com",
 }
 
