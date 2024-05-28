@@ -1,12 +1,18 @@
 import requests
+from concurrent.futures import ThreadPoolExecutor as Pool
 import json
-from multiprocessing.dummy import Pool as ThreadPool
 
 global jackett_config
-jackett_config = {
-    "api_key": "xh0joh233vkuzmjqrhffx7pt2k1y3neb",
-    "url": "http://jackett.elchupakabra.lol",
-}
+try:
+    with open("./Config/jackett.json", "r") as f:
+        jackett_config = json.load(f)
+    print("file opened")
+except Exception as e:
+    jackett_config = {
+        "api_key": "xh0joh233vkuzmjqrhffx7pt2k1y3neb",
+        "url": "http://jackett.elchupakabra.lol",
+    }
+    print("using online api ")
 
 
 def Search(search, catagory=None):
@@ -49,12 +55,12 @@ def Search(search, catagory=None):
         + t
     )
     r = requests.get(url)
-    r = r.text
-    r = json.loads(r)
+    print(r)
+    r = r.json()
+    # r = json.loads(r)
     r = r["Results"]
     print(len(r))
-    pool = ThreadPool(1000)
+    pool = Pool(1000)
     pool.map(extract_info, (r))
-    pool.close()
-    pool.join()
+    pool.shutdown(wait=True)
     return res
