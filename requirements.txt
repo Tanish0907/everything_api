@@ -1,4 +1,7 @@
-requests
+﻿requests
 bs4
 fastapi
 lxml
+tk
+pillow
+customtkinter

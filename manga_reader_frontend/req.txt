@@ -1,0 +1,4 @@
+﻿tk
+pillow
+requests
+customtkinter
