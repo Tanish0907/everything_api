@@ -5,5 +5,5 @@ def fetch(term:str)->dict:
     return results
 def fetch_book(name:str)->dict:
     results=requests.get(f"{url}/manga/{name}").json()
-    print(results)
+    #print(results)
     return results

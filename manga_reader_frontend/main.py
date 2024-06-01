@@ -39,13 +39,12 @@ class Main(c.CTk):
         self.info_list=list(self.res.items())
         self.length=len(self.info_list)
         def create_obj(i):
-            print("test2")
             name=i[0]
             info=i[-1]
             manga_obj_list[name]=Manga(name,info)
             percentage=(self.info_list.index(i)+1)/self.length
             self.progress_bar.set(value=percentage)
-            print(f"created:{name}")
+            print(f"created:{name}:{percentage}")
             
         pool=Pool(10)
         pool.map(create_obj,self.info_list)
