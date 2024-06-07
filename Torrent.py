@@ -3,10 +3,11 @@ from concurrent.futures import ThreadPoolExecutor as Pool
 import json
 
 global jackett_config
+
 try:
     with open("./Config/jackett.json", "r") as f:
         jackett_config = json.load(f)
-    print("file opened")
+        print("file opened")
 except Exception as e:
     jackett_config = {
         "api_key": "xh0joh233vkuzmjqrhffx7pt2k1y3neb",
