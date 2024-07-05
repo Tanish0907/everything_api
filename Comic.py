@@ -21,7 +21,8 @@ def get_issue(i):
     for j in page_link:
         links.append(j.get("src"))
     x = i.find("issue")
-    issue_dict[i[x::].replace("/", "-")] = links
+    x=eval(i[x::].split("/")[0].split("-")[-1])
+    issue_dict[x] = links
 
 
 def get_comic_details(i):
@@ -34,6 +35,7 @@ def get_comic_details(i):
     status = detail[1].text.split(":")
     released = detail[2].text.split(":")
     comic["link"] = ancor
+    comic["id"]=title
     comic["poster"] = poster
     comic[status[0]] = status[-1].replace("\n", "")
     comic[released[0]] = released[-1].replace("\n", "")
@@ -41,7 +43,7 @@ def get_comic_details(i):
 
 
 def Comicsearch(keyword: str):
-    comic_books.clear()
+    comic_book.clear()
     link = f"https://comicextra.org/search?keyword={keyword}"
     r = requests.get(link).text
     soup = bs(r, "lxml")

@@ -56,14 +56,14 @@ def index():
 
 
 @app.get("/manga/search")
-@timedlru_cache(maxsize=10, timeout=600)
+#@timedlru_cache(maxsize=10, timeout=600)
 def manga_search(term: str):
     res = Mangasearch(term)
     return res
 
 
 @app.get("/manga/{manga_name}")
-@timedlru_cache(maxsize=10, timeout=600)
+#@timedlru_cache(maxsize=10, timeout=600)
 def manga(
     manga_name: str, source: str = Query("mangapanda", enum=["mangapanda", "rmanga"])
 ):
@@ -72,21 +72,21 @@ def manga(
 
 
 @app.get("/comic/search")
-@timedlru_cache(maxsize=10, timeout=10)
+#@timedlru_cache(maxsize=10, timeout=10)
 def comic_search(term: str):
     res = Comicsearch(term)
     return res
 
 
 @app.get("/comic/{comic_name}")
-@timedlru_cache(maxsize=10, timeout=600)
+#@timedlru_cache(maxsize=10, timeout=600)
 def comic(comic_name: str):
     res = Get_comic(comic_name)
     return res
 
 
 @app.get("/torr/search")
-@timedlru_cache(maxsize=10, timeout=600)
+#@timedlru_cache(maxsize=10, timeout=600)
 def torr_search(term: str, catagory: Optional[str] = None):
     res = Search(term, catagory)
     return res

@@ -15,17 +15,13 @@ def get_search(i):
     soup = bs(ln, "lxml")
     chapters = soup.find_all("li", class_="row")
     manga = {}
-    title = (
-        i["title"]
-        .replace("(", "")
-        .replace(")", "")
-        .replace(" ", "-")
-        .replace(":", "")
-        .lower()
-    )
+    title =i.get("href").split("/")[-1].split("?")[0]
+
+    manga["id"]=i.get("href").split("/")[-1]
+    manga["title"]=title
     manga["link"] = i.get("href")
     manga["cover"] = i.find("img")["src"]
-    manga["number of chapters"] = len(chapters)
+    manga["number_of_chapters"] = len(chapters)
     manga_res[title] = manga
     print(manga)
 
