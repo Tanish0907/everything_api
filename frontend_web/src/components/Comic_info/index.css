@@ -1,0 +1,15 @@
+#comic_info {
+  padding: 10px;
+  margin: 10px;
+}
+#comic_info>.poster{
+  padding: 10px;
+  height: 100%;
+  width: 100%;
+}
+.comic_data{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}

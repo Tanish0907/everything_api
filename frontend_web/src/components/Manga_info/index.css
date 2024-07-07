@@ -1,0 +1,15 @@
+#manga_info {
+  padding: 10px;
+  margin: 10px;
+}
+#manga_info>.poster{
+  padding: 10px;
+  height: 100%;
+  width: 100%;
+}
+.manga_data{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}

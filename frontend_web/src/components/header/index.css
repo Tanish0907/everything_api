@@ -1,0 +1,77 @@
+.navbar {
+  padding: 2px;
+  background-color: black;
+  height: 7vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.searchandprofile {
+  height: 70px;
+  width: 500px;
+  font-size: 20px;
+  space-between: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+.searchandprofile > .search_field {
+  padding: 10px;
+  height: 50px;
+  font-size: 20px;
+  color: white;
+  border: none;
+  background-color: black;
+  opacity: 0.5;
+  width: 300px;
+  border: 2px solid grey;
+  border-radius: 10px;
+  animation: slideoff_animation 0.5s ease-in;
+}
+.searchandprofile > .search_field:hover {
+  padding: 10px;
+  opacity: 1;
+  color: white;
+  animation: slideon_animation 0.5s ease-out;
+  width: 320px;
+}
+.searchandprofile > .profile {
+  border: 2px solid grey;
+  border-radius: 10px;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border: 1px solid grey;
+  border-radius: 10px;
+}
+.pages {
+  font-weight: bold;
+  font-size: 20px;
+  width: 40%;
+  height: 100%;
+  display: flex;
+  letter-spacing: 2px;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+@keyframes slideon_animation {
+  from {
+    opacity: 0.5;
+    width: 300px;
+  }
+  to {
+    opacity: 10;
+    width: 320px;
+  }
+}
+@keyframes slideoff_animation {
+  from {
+    opacity: 1;
+    width: 320px;
+  }
+  to {
+    opacity: 0.5;
+    width: 300px;
+  }
+}
