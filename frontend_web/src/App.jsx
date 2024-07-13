@@ -10,8 +10,10 @@ import { Torr } from "./components/torrent";
 import { useState} from "react";
 import { Route, Routes ,useLocation} from "react-router-dom";
 import React from 'react';
+import Form from "react-bootstrap/Form";
 
 function App() {
+  const [message,setMessage]=useState('');
   const [card_list, setCard_list] = useState([]);
   const curr_pg=useLocation();
   let res = [];
@@ -44,7 +46,7 @@ function App() {
       
      
       for(let i=0;i<res.length;i++){
-        card_list.push(<Torr link={res[i].link} mag={res[i].magnet} size={res[i].size} title={res[i].Title} cat={res[i].catagory} source={res[i].source}/>);
+        card_list.push(<Torr  id={i} link={res[i].link} mag={res[i].magnet} size={res[i].size} title={res[i].Title} cat={res[i].catagory} source={res[i].source}/>);
       }
       const root=createRoot(document.getElementById("torr_card_div"));
       root.render();
@@ -53,8 +55,24 @@ function App() {
 
   };
  
-  
+  const handleChange=(event)=>{
+    setMessage(event.target.value);
+  }
+  const filter=(event,cat)=>{
+    const filter_lst=[]
+    event.preventDefault();
+    for(let i=0;i<card_list.length;i++)
+    {
+      const elem=card_list[i]
+      if (elem.getAttribute("cat")==cat){
+        filter_lst.push(elem);
+      }
 
+    }
+    console.log(filter_lst)
+    const root=createRoot(document.getElementById("torr_card_div"));
+    root.render(filter_lst)
+  }
 
   function handle_SearchData(data) {
     res = data.data;
@@ -69,7 +87,15 @@ function App() {
       <Routes>
         <Route path="/" element={<div id="manga_card_div" className="manga"></div>} />
         <Route path="/comics" element={<div id="comic_card_div" className="comic"></div>} />
-        <Route path="/torrent" element={<div id="torr_card_div" className="torr"></div>}/>
+        <Route path="/torrent" element={<div className="torr"><div className="filter"> <Form.Control
+          className="search_field"
+          type="text"
+          placeholder="search"
+          value={message}
+          onChange={handleChange}
+        />
+        <Button onClick={(event) => filter(event, message)}>Search</Button>
+</div><div id="torr_card_div" className="torr"></div></div>}/>
       </Routes>
     </>
   );

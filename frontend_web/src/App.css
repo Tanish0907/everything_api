@@ -4,7 +4,11 @@
   text-align: center;
   font-family: Roboto, Helvetica, Arial, sans-serif;
 }
+.filter{
+  height: 5vh;
+  width: 100vw;
 
+}
 .logo {
   height: 6em;
   padding: 1.5em;
