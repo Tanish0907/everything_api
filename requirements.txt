@@ -5,3 +5,8 @@ lxml
 tk
 pillow
 customtkinter
+argparse
+pathlib 
+pandas
+supabase
+numpy
