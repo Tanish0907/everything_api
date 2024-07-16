@@ -13,6 +13,7 @@ import React from 'react';
 import Form from "react-bootstrap/Form";
 
 function App() {
+  const [cache,setCache]=useState([])
   const [message,setMessage]=useState('');
   const [card_list, setCard_list] = useState([]);
   const curr_pg=useLocation();
@@ -48,6 +49,7 @@ function App() {
       for(let i=0;i<res.length;i++){
         card_list.push(<Torr  id={i} link={res[i].link} mag={res[i].magnet} size={res[i].size} title={res[i].Title} cat={res[i].catagory} source={res[i].source}/>);
       }
+      setCache(card_list)
       const root=createRoot(document.getElementById("torr_card_div"));
       root.render();
       root.render(card_list)
@@ -59,13 +61,15 @@ function App() {
     setMessage(event.target.value);
   }
   const filter=(event,cat)=>{
+    console.log(cat)
+    console.log(cache)
     const filter_lst=[]
     event.preventDefault();
-    for(let i=0;i<card_list.length;i++)
+    for(let i=0;i<cache.length;i++)
     {
-      const elem=card_list[i]
-      if (elem.getAttribute("cat")==cat){
-        filter_lst.push(elem);
+      const elem=cache[i]
+      if (elem["props"]["cat"]==cat){
+        filter_lst.push(elem)
       }
 
     }
@@ -90,11 +94,11 @@ function App() {
         <Route path="/torrent" element={<div className="torr"><div className="filter"> <Form.Control
           className="search_field"
           type="text"
-          placeholder="search"
+          placeholder="catagory"
           value={message}
           onChange={handleChange}
         />
-        <Button onClick={(event) => filter(event, message)}>Search</Button>
+        <Button onClick={(event) => filter(event, message)}>Filter</Button>
 </div><div id="torr_card_div" className="torr"></div></div>}/>
       </Routes>
     </>
